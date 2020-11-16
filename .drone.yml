@@ -1,0 +1,27 @@
+kind: pipeline
+name: default
+
+steps:
+  - name: run-test-cases
+    image: node
+    when:
+      status:
+      - failure
+      - success
+    commands:
+      - npm install
+      - git clone https://${GIT_ACCESS_TOKEN}@github.com/${GIT_REPO}.git
+      - cp -r __tests__ ${PROJECT_FOLDER_NAME}/src
+      - cp -r parser.js ${PROJECT_FOLDER_NAME}
+      - cd ${PROJECT_FOLDER_NAME} 
+      - npm install
+      - env PROJECT_FOLDER_NAME=${PROJECT_FOLDER_NAME} npm test
+  - name: result
+    image: node
+    when:
+      status:
+      - failure
+      - success
+    commands:
+      - cd ${PROJECT_FOLDER_NAME} 
+      - node parser.js
